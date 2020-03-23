@@ -49,6 +49,12 @@ class User implements UserInterface
     private $password;
 
     /**
+     * @var string The hashed confirmed password
+     * @Assert\IdenticalTo(propertyPath="password", message="la confirmation du mot de passe n'est pas valide") 
+     */
+    private $passwordConfirm;
+
+    /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"customers_read","invoices_read","invoices_subresource","users_read"})
      * @Assert\NotBlank(message="le prénom est obligatoire")
@@ -131,6 +137,21 @@ class User implements UserInterface
     public function setPassword(string $password): self
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function getPasswordConfirm(): string
+    {
+        return (string) $this->passwordConfirm;
+    }
+
+    public function setPasswordConfirm(string $passwordConfirm): self
+    {
+        $this->passwordConfirm = $passwordConfirm;
 
         return $this;
     }
