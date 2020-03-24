@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Field from '../components/forms/Field';
 import UsersAPI from '../services/UsersAPI';
+import { toast } from 'react-toastify';
 
 const RegisterPage = ({ history }) => {
 
@@ -35,6 +36,7 @@ const RegisterPage = ({ history }) => {
             await UsersAPI.register(user);
             setErrors({});
             // notification du succès
+            toast.success("Votre inscription est effective. Vous pouvez vous connecter.")
             history.replace("/login");
         } catch({ response }) {
 			const { violations } = response.data;
@@ -44,7 +46,8 @@ const RegisterPage = ({ history }) => {
 					apiErrors[propertyPath] = message;
 				});
                 setErrors(apiErrors);
-				// todo : flash notification d'erreurs
+                // todo : flash notification d'erreurs
+                toast.error("Des erreurs dans votre formulaire.")
 			}
 		}
     }

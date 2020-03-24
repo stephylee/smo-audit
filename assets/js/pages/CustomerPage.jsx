@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Field from '../components/forms/Field';
 import CustomerAPI from "../services/CustomersAPI";
+import { toast } from 'react-toastify';
 
 const CustomerPage = ({ match, history }) => {
 
@@ -23,23 +24,24 @@ const CustomerPage = ({ match, history }) => {
 
 	const [editing, setEditing] = useState(false);
 
-	// Récupération du customer en focntion de l'identifiant
+	// Chargement du customer si besoin au chargement du composant ou au changement de l'identifiant
+	useEffect(() => {
+		if(id !== "new") {
+			setEditing(true);
+			fetchCustomer(id);
+		}
+	}, [id]);
+
+	// Récupération du customer en fonction de l'identifiant
 	const fetchCustomer = async id => {
 		try {
 			const { firstname, lastname, email, company } = await CustomerAPI.findCustomer(id);
 			setCustomer({ firstname, lastname, email, company });
 		} catch(error) {
-			// todo : Notification flash d'une erreur
+			toast.error("Le client n'a pas été trouvé")
 			history.replace("/customers");
 		}
 	}
-
-	// Chargement du customer si besoin au chargement du composant ou au changement de l'identifiant
-	useEffect(() => {
-		if(id !== "new") setEditing(true);
-		fetchCustomer(id);
-	}, [id]);
-	
 
 	// Gestion des changement des inputs dans le formulaire
 	const handleChange = ({currentTarget}) => {
@@ -52,15 +54,15 @@ const CustomerPage = ({ match, history }) => {
 		event.preventDefault();
 
 		try {
+			setErrors({});
 			if(editing) {
 				await CustomerAPI.updateCustomer(id, customer);
-				// todo : flash notification de succès
+				toast.success("Le client a été modifié")
 			}else{
 				await CustomerAPI.createCustomer(customer);
-				// todo : flash notification de succès
+				toast.success("Le client a été créé")
 				history.replace("/customers");
 			}
-			setErrors({});
 		} catch({ response }) {
 			const { violations } = response.data;
 			if(violations){
@@ -69,8 +71,7 @@ const CustomerPage = ({ match, history }) => {
 					apiErrors[propertyPath] = message;
 				});
 				setErrors(apiErrors);
-
-				// todo : flash notification d'erreurs
+				toast.error("Des erreurs dans le formulaire")
 			}
 		}
 	};
